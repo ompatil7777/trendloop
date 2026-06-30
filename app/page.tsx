@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getFeaturedProducts, getTrendingProducts, getProductsUnderPrice, getProducts } from "../lib/data/products";
+import { getFeaturedProducts, getTrendingProducts, getProductsUnderPrice, getProducts, getProductsByTrendTheme } from "../lib/data/products";
 import { getCategories } from "../lib/data/categories";
 import { getGuides } from "../lib/data/guides";
 import ProductCard from "../components/feed/ProductCard";
 import RelatedRail from "../components/product/RelatedRail";
+import TrendThemeRail from "../components/feed/TrendThemeRail";
 import NewsletterCapture from "./newsletter-capture";
 import { ArrowRight, Sparkles, Flame, Eye, Bookmark, TrendingUp } from "lucide-react";
 
@@ -17,14 +18,20 @@ export default async function HomePage() {
     budgetProducts,
     categories,
     guides,
-    recentResult
+    recentResult,
+    gimmeGummyProducts,
+    afrohemianDecorProducts,
+    doilyEraProducts
   ] = await Promise.all([
     getFeaturedProducts(3),
     getTrendingProducts(8),
     getProductsUnderPrice(1500, 8),
     getCategories(),
     getGuides(),
-    getProducts({ sortBy: 'newest', limit: 8 })
+    getProducts({ sortBy: 'newest', limit: 8 }),
+    getProductsByTrendTheme('gimme-gummy', 6),
+    getProductsByTrendTheme('afrohemian-decor', 6),
+    getProductsByTrendTheme('doily-era', 6)
   ]);
 
   const recentProducts = recentResult.products;
@@ -108,6 +115,35 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* TREND THEME SECTIONS */}
+      <TrendThemeRail
+        title="Gimme Gummy 🍬"
+        subtitle="Bendy, jelly-textured, impossible not to touch — the tactile trend taking over phone cases, nails, and beauty."
+        badgeText="Rising trend"
+        themeSlug="gimme-gummy"
+        trendTag="Gummy Pick"
+        products={gimmeGummyProducts}
+      />
+
+      <TrendThemeRail
+        title="Afrohemian Decor 🏺"
+        subtitle="Where bohemian texture meets bold African pattern — the home aesthetic blending warmth, color, and craft."
+        badgeText="Pinterest Predicts"
+        themeSlug="afrohemian-decor"
+        trendTag="Afrohemian Find"
+        products={afrohemianDecorProducts}
+      />
+
+      <TrendThemeRail
+        title="Doily Era 🧶"
+        subtitle="Lace gets a 2026 glow-up — crochet detailing showing up everywhere from jacket collars to phone cases."
+        badgeText="Hot aesthetic"
+        themeSlug="doily-era"
+        trendTag="Doily Drop"
+        products={doilyEraProducts}
+      />
+
 
       {/* 3. EDITOR'S PICKS GRID */}
       <section className="space-y-6">

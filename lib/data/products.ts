@@ -12,6 +12,7 @@ export interface GetProductsParams {
   sortBy?: "trending" | "newest" | "price-low" | "price-high" | "popular";
   limit?: number;
   offset?: number;
+  trendTheme?: string;
 }
 
 /**
@@ -20,6 +21,11 @@ export interface GetProductsParams {
 export async function getProducts(params: GetProductsParams = {}): Promise<{ products: Product[]; totalCount: number }> {
   const supabase = await createClient();
   let query = supabase.from("products").select("*", { count: "exact" });
+
+  // 0. Filter by trend theme
+  if (params.trendTheme) {
+    query = query.contains("trend_theme", [params.trendTheme]);
+  }
 
   // 1. Filter by parent category slug
   if (params.categorySlug) {
@@ -172,6 +178,26 @@ export async function getTrendingProducts(limit = 10): Promise<Product[]> {
   }
   return (data as Product[]) || [];
 }
+
+/**
+ * Fetch products belonging to a specific Trend Theme (e.g. 'gimme-gummy', 'afrohemian-decor', 'doily-era').
+ */
+export async function getProductsByTrendTheme(themeSlug: string, limit = 6): Promise<Product[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .contains("trend_theme", [themeSlug])
+    .order("trending_score", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error(`Error fetching products by trend theme "${themeSlug}":`, error);
+    return [];
+  }
+  return (data as Product[]) || [];
+}
+
 
 /**
  * Fetch related products (e.g. products in the same category, excluding active one).

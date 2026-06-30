@@ -10,13 +10,15 @@ interface DiscoverClientProps {
   initialTotal: number;
   categorySlug?: string;
   subcategorySlug?: string;
+  trendTheme?: string;
 }
 
 export default function DiscoverClient({ 
   initialProducts, 
   initialTotal,
   categorySlug,
-  subcategorySlug
+  subcategorySlug,
+  trendTheme
 }: DiscoverClientProps) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [offset, setOffset] = useState(initialProducts.length);
@@ -26,7 +28,7 @@ export default function DiscoverClient({
   const handleLoadMore = async () => {
     if (loading || !hasMore) return;
     setLoading(true);
-
+  
     try {
       const limit = 12;
       const result = await getProducts({
@@ -34,7 +36,8 @@ export default function DiscoverClient({
         limit,
         offset,
         categorySlug,
-        subcategorySlug
+        subcategorySlug,
+        trendTheme
       });
 
       if (result.products.length > 0) {

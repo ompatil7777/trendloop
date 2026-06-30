@@ -50,6 +50,7 @@ function AdminContent() {
   const [savesCount, setSavesCount] = useState(0);
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [retailerShares, setRetailerShares] = useState<any[]>([]);
+  const [trendShares, setTrendShares] = useState<any[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
 
   // Form State
@@ -63,6 +64,7 @@ function AdminContent() {
   const [newProductCons, setNewProductCons] = useState("");
   const [amazonUrl, setAmazonUrl] = useState("");
   const [nikeUrl, setNikeUrl] = useState("");
+  const [selectedTrends, setSelectedTrends] = useState<string[]>([]);
 
   const [categoriesList, setCategoriesList] = useState<any[]>([]);
   
@@ -144,6 +146,34 @@ function AdminContent() {
       })).sort((a, b) => b.count - a.count);
 
       setRetailerShares(shares);
+
+      // 4. Click Shares by Trend Theme (based on utm_source = trend_*)
+      const { data: trendClicks } = await supabase
+        .from("click_events")
+        .select("utm_source")
+        .like("utm_source", "trend_%");
+
+      const trendCounts: Record<string, number> = {};
+      let totalTrendEvents = 0;
+      (trendClicks || []).forEach((c: any) => {
+        const rawSource = c.utm_source || "other";
+        let displayName = rawSource.replace("trend_", "");
+        if (displayName === "gimme-gummy" || displayName === "gummy") displayName = "Gimme Gummy 🍬";
+        else if (displayName === "afrohemian-decor" || displayName === "afrohemian") displayName = "Afrohemian Decor 🏺";
+        else if (displayName === "doily-era" || displayName === "doily") displayName = "Doily Era 🧶";
+        else displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+        
+        trendCounts[displayName] = (trendCounts[displayName] || 0) + 1;
+        totalTrendEvents++;
+      });
+
+      const trendShareList = Object.entries(trendCounts).map(([name, count]) => ({
+        name,
+        count,
+        share: totalTrendEvents > 0 ? count / totalTrendEvents : 0
+      })).sort((a, b) => b.count - a.count);
+
+      setTrendShares(trendShareList);
 
     } catch (err) {
       console.error("Error loading stats:", err);
@@ -227,6 +257,7 @@ function AdminContent() {
       features: ["Premium Quality", "Durable materials"],
       pros: newProductPros.split(",").map(p => p.trim()).filter(Boolean),
       cons: newProductCons.split(",").map(p => p.trim()).filter(Boolean),
+      trend_theme: selectedTrends,
       images: [{
         url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&auto=format&fit=crop&q=80",
         alt: newProductName,
@@ -284,6 +315,7 @@ function AdminContent() {
     setNewProductCons("");
     setAmazonUrl("");
     setNikeUrl("");
+    setSelectedTrends([]);
   };
 
   // Role authentication fallback view
@@ -428,24 +460,51 @@ function AdminContent() {
                   </div>
                 </div>
 
-                <div className="md:col-span-5 bg-white dark:bg-zinc-900 border border-card-border p-5 rounded-2xl md:rounded-3xl shadow-sm space-y-4">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Clicks By Retailer</h3>
-                  <div className="space-y-4">
-                    {retailerShares.length > 0 ? (
-                      retailerShares.map((ret) => (
-                        <div key={ret.name} className="space-y-1">
-                          <div className="flex justify-between items-center text-[10px] font-bold uppercase">
-                            <span className="text-foreground/60">{ret.name}</span>
-                            <span className="text-foreground">{ret.count} ({Math.round(ret.share * 100)}%)</span>
+                </div>
+
+                <div className="md:col-span-5 space-y-6">
+                  {/* Clicks By Retailer */}
+                  <div className="bg-white dark:bg-zinc-900 border border-card-border p-5 rounded-2xl md:rounded-3xl shadow-sm space-y-4">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Clicks By Retailer</h3>
+                    <div className="space-y-4">
+                      {retailerShares.length > 0 ? (
+                        retailerShares.map((ret) => (
+                          <div key={ret.name} className="space-y-1">
+                            <div className="flex justify-between items-center text-[10px] font-bold uppercase">
+                              <span className="text-foreground/60">{ret.name}</span>
+                              <span className="text-foreground">{ret.count} ({Math.round(ret.share * 100)}%)</span>
+                            </div>
+                            <div className="w-full h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-gold rounded-full" style={{ width: `${ret.share * 100}%` }} />
+                            </div>
                           </div>
-                          <div className="w-full h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-gold rounded-full" style={{ width: `${ret.share * 100}%` }} />
+                        ))
+                      ) : (
+                        <p className="text-xs text-foreground/40 text-center py-6">No clicks logged yet.</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Clicks By Trend Theme */}
+                  <div className="bg-white dark:bg-zinc-900 border border-card-border p-5 rounded-2xl md:rounded-3xl shadow-sm space-y-4">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Clicks By Trend Theme</h3>
+                    <div className="space-y-4">
+                      {trendShares.length > 0 ? (
+                        trendShares.map((trend) => (
+                          <div key={trend.name} className="space-y-1">
+                            <div className="flex justify-between items-center text-[10px] font-bold uppercase">
+                              <span className="text-foreground/60">{trend.name}</span>
+                              <span className="text-foreground">{trend.count} ({Math.round(trend.share * 100)}%)</span>
+                            </div>
+                            <div className="w-full h-2 bg-gray-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                              <div className="h-full bg-gold rounded-full" style={{ width: `${trend.share * 100}%` }} />
+                            </div>
                           </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-xs text-foreground/40 text-center py-6">No clicks logged yet.</p>
-                    )}
+                        ))
+                      ) : (
+                        <p className="text-xs text-foreground/40 text-center py-6">No trend clicks logged yet.</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -521,6 +580,36 @@ function AdminContent() {
                   <option key={sub.id} value={sub.id}>{sub.name}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="space-y-1.5 sm:col-span-2">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-foreground/55 block">Tag Trend Themes</label>
+              <div className="flex flex-wrap gap-4 mt-1">
+                {[
+                  { slug: 'gimme-gummy', name: 'Gimme Gummy 🍬' },
+                  { slug: 'afrohemian-decor', name: 'Afrohemian Decor 🏺' },
+                  { slug: 'doily-era', name: 'Doily Era 🧶' }
+                ].map(trend => {
+                  const isChecked = selectedTrends.includes(trend.slug);
+                  return (
+                    <label key={trend.slug} className="flex items-center gap-2 text-xs font-semibold text-foreground/75 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedTrends(prev => [...prev, trend.slug]);
+                          } else {
+                            setSelectedTrends(prev => prev.filter(t => t !== trend.slug));
+                          }
+                        }}
+                        className="rounded border-card-border text-gold focus:ring-gold w-4 h-4"
+                      />
+                      <span>{trend.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

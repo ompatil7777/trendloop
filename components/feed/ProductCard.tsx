@@ -11,9 +11,10 @@ import { analytics } from "../../lib/analytics/trackEvent";
 interface ProductCardProps {
   product: Product;
   priority?: boolean;
+  trendTag?: string;
 }
 
-export default function ProductCard({ product, priority = false }: ProductCardProps) {
+export default function ProductCard({ product, priority = false, trendTag }: ProductCardProps) {
   const { isSaved, toggleSaveProduct, formatPrice, addToast } = useApp();
   const [isHovered, setIsHovered] = useState(false);
   const saved = isSaved(product.id);
@@ -123,7 +124,11 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           <span className="text-[9px] font-bold tracking-widest text-foreground/40 uppercase">
             {product.brand}
           </span>
-          {product.is_trending && (
+          {trendTag ? (
+            <span className="bg-gold/10 text-gold dark:text-gold text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
+              {trendTag}
+            </span>
+          ) : product.is_trending && (
             <span className="bg-gold-light text-gold dark:text-gold text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded">
               Trending
             </span>
