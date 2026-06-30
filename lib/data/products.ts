@@ -15,6 +15,35 @@ export interface GetProductsParams {
   trendTheme?: string;
 }
 
+const trendSlugs: Record<string, string[]> = {
+  "gimme-gummy": [
+    "sitovi-glass-oil-sprayer-bottle",
+    "continuous-spray-oil-dispenser",
+    "aesthetic-100ml-glass-sprayer",
+    "portable-handheld-sealing-machine",
+    "misamo-flexible-faucet-extender",
+    "ninja-blast-portable-cordless-blender"
+  ],
+  "afrohemian-decor": [
+    "sahaj-paridhan-rajasthani-wrap-skirt",
+    "imsid-handwoven-natural-jute-rug",
+    "natural-braided-stylish-jute-rug",
+    "ambadi-home-cotton-wool-boho-rug",
+    "handmadetm-handwoven-boho-runner",
+    "handmadetm-handwoven-boho-area-rug"
+  ],
+  "doily-era": [
+    "jawdrobe-georgette-lightweight-skirt",
+    "pinkhub-womens-summer-pleated-skirt",
+    "icw-crochet-backless-vacation-set",
+    "sannidhi-crochet-swimwear-coverup",
+    "sannidhi-crochet-cropped-hollowout-top",
+    "aahwan-hollow-backless-crochet-top",
+    "icw-knitted-crochet-openwork-top",
+    "ke-exports-printed-crochet-pattern-top"
+  ]
+};
+
 /**
  * Fetches products list from Supabase, applying filters and sorting.
  */
@@ -24,7 +53,10 @@ export async function getProducts(params: GetProductsParams = {}): Promise<{ pro
 
   // 0. Filter by trend theme
   if (params.trendTheme) {
-    query = query.contains("trend_theme", [params.trendTheme]);
+    const slugs = trendSlugs[params.trendTheme] || [];
+    if (slugs.length > 0) {
+      query = query.in("slug", slugs);
+    }
   }
 
   // 1. Filter by parent category slug
@@ -184,10 +216,13 @@ export async function getTrendingProducts(limit = 10): Promise<Product[]> {
  */
 export async function getProductsByTrendTheme(themeSlug: string, limit = 6): Promise<Product[]> {
   const supabase = await createClient();
+  const slugs = trendSlugs[themeSlug] || [];
+  if (slugs.length === 0) return [];
+
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .contains("trend_theme", [themeSlug])
+    .in("slug", slugs)
     .order("trending_score", { ascending: false })
     .limit(limit);
 

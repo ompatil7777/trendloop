@@ -460,8 +460,6 @@ function AdminContent() {
                   </div>
                 </div>
 
-                </div>
-
                 <div className="md:col-span-5 space-y-6">
                   {/* Clicks By Retailer */}
                   <div className="bg-white dark:bg-zinc-900 border border-card-border p-5 rounded-2xl md:rounded-3xl shadow-sm space-y-4">

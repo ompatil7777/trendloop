@@ -447,10 +447,14 @@ async function run() {
 
     // 2. Insert remotely
     console.log("--> Remote Database:");
-    const { error: rpErr } = await remoteSupabase.from('products').upsert(newProductsData);
+    const remoteProductsData = newProductsData.map(p => {
+      const { trend_theme, ...rest } = p;
+      return rest;
+    });
+
+    const { error: rpErr } = await remoteSupabase.from('products').upsert(remoteProductsData);
     if (rpErr) {
       console.error("Remote Products Error:", rpErr.message);
-      console.log("⚠️ If this error is about column 'trend_theme' not existing, please run the ALTER TABLE statement in Supabase SQL editor.");
     }
     else console.log("   ✅ Remote Products upserted");
 
