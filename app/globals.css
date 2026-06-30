@@ -1,26 +1,157 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Neutral Color Palette (Premium Minimalist/Charcoal/Stone) */
+  --background: #fcfcfc; /* Clean premium warm off-white */
+  --foreground: #121212; /* Deep charcoal/near-black */
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.05);
+  --accent-gold: #c5a880; /* Premium champagne gold */
+  --accent-gold-hover: #b0936b;
+  --accent-gold-light: rgba(197, 168, 128, 0.12);
+  
+  --neutral-gray-50: #f9f9fb;
+  --neutral-gray-100: #f3f3f5;
+  --neutral-gray-200: #e5e5eb;
+  --neutral-gray-300: #d1d1db;
+  --neutral-gray-400: #9e9eab;
+  --neutral-gray-500: #757585;
+  --neutral-gray-600: #585866;
+  --neutral-gray-700: #3c3c47;
+  --neutral-gray-800: #25252e;
+  --neutral-gray-900: #14141a;
+  
+  --font-sans: var(--font-inter), sans-serif;
+  --font-display: var(--font-outfit), sans-serif;
+  
+  /* Glassmorphism settings */
+  --glass-bg: rgba(252, 252, 252, 0.75);
+  --glass-border: rgba(18, 18, 18, 0.06);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
+/* Force dark class compatibility or preferences media-query */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0a0b; /* Deep obsidian/near-black */
+    --foreground: #f4f4f6; /* Soft warm white */
+    --card-bg: #111113;
+    --card-border: rgba(255, 255, 255, 0.04);
+    --accent-gold: #d4af37; /* More vibrant premium gold in dark mode */
+    --accent-gold-hover: #c49e27;
+    --accent-gold-light: rgba(212, 175, 55, 0.15);
+    
+    --neutral-gray-50: #111113;
+    --neutral-gray-100: #1b1b1e;
+    --neutral-gray-200: #252529;
+    --neutral-gray-300: #3c3c43;
+    --neutral-gray-400: #585861;
+    --neutral-gray-500: #757580;
+    --neutral-gray-600: #9e9eab;
+    --neutral-gray-700: #d1d1db;
+    --neutral-gray-800: #e5e5eb;
+    --neutral-gray-900: #f3f3f5;
+    
+    --glass-bg: rgba(10, 10, 11, 0.75);
+    --glass-border: rgba(244, 244, 246, 0.07);
   }
 }
 
+/* Manual class override support if toggle exists */
+.dark {
+  --background: #0a0a0b;
+  --foreground: #f4f4f6;
+  --card-bg: #111113;
+  --card-border: rgba(255, 255, 255, 0.04);
+  --accent-gold: #d4af37;
+  --accent-gold-hover: #c49e27;
+  --accent-gold-light: rgba(212, 175, 55, 0.15);
+  
+  --neutral-gray-50: #111113;
+  --neutral-gray-100: #1b1b1e;
+  --neutral-gray-200: #252529;
+  --neutral-gray-300: #3c3c43;
+  --neutral-gray-400: #585861;
+  --neutral-gray-500: #757580;
+  --neutral-gray-600: #9e9eab;
+  --neutral-gray-700: #d1d1db;
+  --neutral-gray-800: #e5e5eb;
+  --neutral-gray-900: #f3f3f5;
+  
+  --glass-bg: rgba(10, 10, 11, 0.75);
+  --glass-border: rgba(244, 244, 246, 0.07);
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-gold: var(--accent-gold);
+  --color-gold-hover: var(--accent-gold-hover);
+  --color-gold-light: var(--accent-gold-light);
+  
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  
+  --color-gray-50: var(--neutral-gray-50);
+  --color-gray-100: var(--neutral-gray-100);
+  --color-gray-200: var(--neutral-gray-200);
+  --color-gray-300: var(--neutral-gray-300);
+  --color-gray-400: var(--neutral-gray-400);
+  --color-gray-500: var(--neutral-gray-500);
+  --color-gray-600: var(--neutral-gray-600);
+  --color-gray-700: var(--neutral-gray-700);
+  --color-gray-800: var(--neutral-gray-800);
+  --color-gray-900: var(--neutral-gray-900);
+}
+
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+/* Glassmorphism helper utility */
+.glass-effect {
+  background-color: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Hide scrollbars for sliders but keep scrollability */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Custom fade effects */
+.fade-mask {
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-gray-400);
 }
